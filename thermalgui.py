@@ -5,6 +5,8 @@ import glob
 import datetime
 import clipboard
 
+#This is a comment to test out GitHub
+
 #allows for a failsafe to break the program
 auto.PAUSE = 1
 auto.FAILSAFE = True
