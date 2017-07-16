@@ -6,6 +6,7 @@ import datetime
 import clipboard
 
 #another comment
+#this is pushed from gitkraken
 
 #allows for a failsafe to break the program
 auto.PAUSE = 1
