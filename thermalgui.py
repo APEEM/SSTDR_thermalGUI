@@ -4,6 +4,7 @@ import pyautogui as auto
 import glob
 import datetime
 import clipboard
+import time
 
 #Pushed from my NREL computer
 
@@ -41,6 +42,8 @@ while True:
                 ctrlA = 0
                 ctrlC = 0
                 ctrlV = 0
+                progPause = 0
+                sleeper = 1
                 
                 #this definition contains all the functions 
                 def doStuff(self):
@@ -49,6 +52,7 @@ while True:
                         auto.click()
                         
                     elif self.doubleclick == 1:
+                        auto.moveTo(self.location, duration = self.duration)
                         auto.click(clicks=2)
                         
                     elif self.pri == 1:
@@ -71,6 +75,9 @@ while True:
                     elif self.ctrlV == 1:
                         auto.hotkey('ctrl', 'v')
                         
+                    elif self.progPause == 1:
+                        time.sleep(int(self.sleeper))
+                        
     
     #this variable will contain all the step objects    
     step = []        
@@ -80,7 +87,7 @@ while True:
             
             step.append(automate()) #creates a new object for each step at the begining of the loop
             
-            x = input('\nWhat would you like to do with this step: \n1=set location and click, \n2=type a message, \n3=hit enter, \n4=double click, \n5=prints a file name with the date and time, \n6=ctrlA, \n7=ctrlC, \n8=ctrlV, \n9=run steps\n')
+            x = input('\nWhat would you like to do with this step: \n1=set location and click, \n2=type a message, \n3=hit enter, \n4=Move and double click, \n5=prints a file name with the date and time, \n6=ctrlA, \n7=ctrlC, \n8=ctrlV, \n9=Pause \nr=run steps\n')
             
             
             #this if block changes the variables in the object to determin which function is run
@@ -97,6 +104,7 @@ while True:
                 step[len(step) - 1].enter = 1
                      
             elif x == '4': 
+                step[len(step) - 1].location = auto.position()
                 step[len(step) - 1].doubleclick = 1
                      
             elif x == '5': 
@@ -110,9 +118,13 @@ while True:
 
             elif x == '8': 
                 step[len(step) - 1].ctrlV = 1
+                     
+            elif x == '9': 
+                step[len(step) - 1].progPause = 1
+                step[len(step) - 1].sleeper = input('Enter the amount of time to pause: ')
             
             #breaks the loop when the user wants to run the steps         
-            elif x == '9':
+            elif x == 'r':
                 break
         
             else:
