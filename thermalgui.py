@@ -18,8 +18,8 @@ while True:
     
     #set temperature logging start button position
     print('  Welcome to thermalGUI for the SSTDR program automation.  '.center(240,'#'))
-    input('Place the mouse over the start button and hit enter.'.center(80))
-    logStart = auto.position()
+#    input('Place the mouse over the start button and hit enter.'.center(80))
+#    logStart = auto.position()
     
     
     startTemp = input('What is the starting temperature?: '.center(80)) or 80
@@ -149,6 +149,9 @@ while True:
     auto.hotkey('ctrl', 'a')
     auto.hotkey('ctrl', 'c')
     tempFiles = clipboard.paste()
+    
+    logStart = auto.locateCenterOnScreen('start.png')
+    
     
     while True:
          
