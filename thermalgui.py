@@ -5,9 +5,7 @@ import glob
 import datetime
 import clipboard
 
-#another comment
-#this is pushed from gitkraken
-#Yet another comment
+#Pushed from my NREL computer
 
 #allows for a failsafe to break the program
 auto.PAUSE = 1
