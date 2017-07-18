@@ -3,8 +3,8 @@ import pandas as pd
 import pyautogui as auto
 import glob
 import datetime
-import clipboard
 import time
+import os
 
 #Pushed from my NREL computer
 
@@ -18,14 +18,15 @@ while True:
     
     #set temperature logging start button position
     print('  Welcome to thermalGUI for the SSTDR program automation.  '.center(240,'#'))
-#    input('Place the mouse over the start button and hit enter.'.center(80))
-#    logStart = auto.position()
+    input('Place the mouse over the start button and hit enter.'.center(80))
+    logStart = auto.position()
     
     
     startTemp = input('What is the starting temperature?: '.center(80)) or 80
     tempIncriment = input('What is the temperature incriment?: '.center(80)) or 10
     numIncriments = input('How many temperature points do you want to record?:'.center(80)) or 1
-    
+    print('Please enter the file path for the temperature logs.'.center(79), 'Hit enter for default:'.center(80))
+    tempFiles = input() or 'c:\\users\\jmajor\\desktop\\new'
     
     #creates a class to be used for each step of the SSTDR program
     class automate:
@@ -141,17 +142,6 @@ while True:
     
     input('\nHit enter to start the program\n')
     
-    #locates the temperature log file directory and automatically sets glob to read from it
-    x = auto.locateCenterOnScreen('directory.png')
-    auto.moveTo(x, duration = 1)
-    auto.moveRel(0, 45, duration = 1)
-    auto.click(clicks=2)
-    auto.hotkey('ctrl', 'a')
-    auto.hotkey('ctrl', 'c')
-    tempFiles = clipboard.paste()
-    
-    logStart = auto.locateCenterOnScreen('start.png')
-    
     
     while True:
          
@@ -160,6 +150,8 @@ while True:
         auto.click(logStart,)
         auto.moveRel(110,0, duration = 2)
         auto.click()
+        
+        time.sleep(1)
         
         #This lists all the files within a directory
         fileList = (glob.glob(tempFiles + '\*.log'))
@@ -173,7 +165,8 @@ while True:
         print("Rounded last temp: ", round(last))
         print("Set temp: ",temp, "\n")
         
-       
+        #Deletes the temp file so the folder doesn't fill up
+        os.remove(fileList[0])
     
         
         #checks if the last recorded temperature equals the set point
@@ -185,6 +178,9 @@ while True:
                 step[i].doStuff() 
             ####################################################################end
             
+            
+               
+                
             print('\nSSTDR program run at %s degrees' %temp)
             
             temp += int(tempIncriment) #incriments the set temperature
