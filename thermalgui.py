@@ -4,9 +4,9 @@ import pyautogui as auto
 import glob
 import datetime
 import time
+import pickle
 import os
 
-#Pushed from my NREL computer
 
 #allows for a failsafe to break the program
 auto.PAUSE = 1
@@ -17,6 +17,7 @@ while True:
     ##########################################################################start
     
     #set temperature logging start button position
+    print('\n\n')
     print('  Welcome to thermalGUI for the SSTDR program automation.  '.center(240,'#'))
     input('Place the mouse over the start button and hit enter.'.center(80))
     logStart = auto.position()
@@ -82,13 +83,13 @@ while True:
     
     #this variable will contain all the step objects    
     step = []        
-                
+    rs = 0 #used to run saved steps
     #This loop alows the user to enter multiple steps
     while True:
             
             step.append(automate()) #creates a new object for each step at the begining of the loop
             
-            x = input('\nWhat would you like to do with this step: \n1=set location and click, \n2=type a message, \n3=hit enter, \n4=Move and double click, \n5=prints a file name with the date and time, \n6=ctrlA, \n7=ctrlC, \n8=ctrlV, \n9=Pause \nr=run steps\n')
+            x = input('\nWhat would you like to do with this step: \n1 = Move to and click a location, \n2 = Move to and double click a location, \n3 = Prints a file name with the date and time, \n4 = ctrl a,\n5 = Pause, \ns = Save steps, \nrs = Run saved steps, \nr = Run steps\n')
             
             
             #this if block changes the variables in the object to determin which function is run
@@ -97,32 +98,41 @@ while True:
                 step[len(step) - 1].move = 1
                 print(step[len(step) - 1].location)
             
-            elif x == '2': 
-                step[len(step) -1].message = input('Enter a message to print: ')
-                step[len(step) - 1].pri = 1
+#            elif x == '2': 
+#                step[len(step) -1].message = input('Enter a message to print: ')
+#                step[len(step) - 1].pri = 1
             
-            elif x == '3': 
-                step[len(step) - 1].enter = 1
+#            elif x == '3': 
+#                step[len(step) - 1].enter = 1
                      
-            elif x == '4': 
+            elif x == '2': 
                 step[len(step) - 1].location = auto.position()
                 step[len(step) - 1].doubleclick = 1
                      
-            elif x == '5': 
+            elif x == '3': 
                 step[len(step) - 1].dateTime = 1
 
-            elif x == '6': 
+            elif x == '4': 
                 step[len(step) - 1].ctrlA = 1
 
-            elif x == '7': 
-                step[len(step) - 1].ctrlC = 1
-
-            elif x == '8': 
-                step[len(step) - 1].ctrlV = 1
+#            elif x == '7': 
+#                step[len(step) - 1].ctrlC = 1
+#
+#            elif x == '8': 
+#                step[len(step) - 1].ctrlV = 1
                      
-            elif x == '9': 
+            elif x == '5': 
                 step[len(step) - 1].progPause = 1
                 step[len(step) - 1].sleeper = input('Enter the amount of time to pause: ')
+                
+            elif x == 's':
+                with open('company_data.pkl', 'wb') as output:
+                    for g in range(len(step)-1):
+                        pickle.dump(step[g], output, pickle.HIGHEST_PROTOCOL)
+                
+            elif x == 'rs':
+                rs = 1
+                break
             
             #breaks the loop when the user wants to run the steps         
             elif x == 'r':
@@ -142,16 +152,16 @@ while True:
     
     input('\nHit enter to start the program\n')
     
+#    if rs !=1:        
+#        l = input('How many times would you like these steps to run?\n') or '1'
     
-    while True:
+    while True and rs != 1:
          
         #Starts and ends temperature logging
         auto.moveTo(logStart, duration = 2)
         auto.click(logStart,)
         auto.moveRel(110,0, duration = 2)
         auto.click()
-        
-        time.sleep(1)
         
         #This lists all the files within a directory
         fileList = (glob.glob(tempFiles + '\*.log'))
@@ -190,6 +200,56 @@ while True:
         if endloop == int(numIncriments): #how many incriemtns of 25 degreees to do
             break
         
+    while True and rs == 1:
+         
+        #Starts and ends temperature logging
+        auto.moveTo(logStart, duration = 2)
+        auto.click(logStart,)
+        auto.moveRel(110,0, duration = 2)
+        auto.click()
+        
+        #This lists all the files within a directory
+        fileList = (glob.glob(tempFiles + '\*.log'))
+        lastFileNum = len(fileList) - 1
+        #print(fileList[lastFileNum]) #Used for debugging
+        
+        #This reads the temp log and analizes the data
+        data = pd.read_table(fileList[lastFileNum] , skiprows = 6)
+        last = float(data.Temp.tail(1))
+        print("Last temp: ",last)
+        print("Rounded last temp: ", round(last))
+        print("Set temp: ",temp, "\n")
+        
+        #Deletes the temp file so the folder doesn't fill up
+        os.remove(fileList[0])
+    
+        
+        #checks if the last recorded temperature equals the set point
+        if round(last) >= temp -1 and round(last) <= temp + 1: #Use the >= and <= to set temperature range
+
+            stepsFromSaved = []
+            b = 0
+            with open('company_data.pkl', 'rb') as i:
+                while True:
+                            
+                    stepsFromSaved.append(None)
+                    try:
+                           stepsFromSaved[b] = pickle.load(i)
+                    except EOFError:
+                        break
+                    b += 1
+                            
+                for g in range(len(stepsFromSaved) - 1):
+                        stepsFromSaved[g].doStuff()
+                
+            print('\nSSTDR program run at %s degrees' %temp)
+            
+            temp += int(tempIncriment) #incriments the set temperature
+            
+            endloop += 1 #incriments the endloop argument
+            
+        if endloop == int(numIncriments): #how many incriemtns of 25 degreees to do
+            break
         
     endProgram = input('\nWould you like to run the program again? y\\n: '.center(40))
     if endProgram == 'n':
