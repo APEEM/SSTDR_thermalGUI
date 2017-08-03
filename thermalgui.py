@@ -33,7 +33,7 @@ while True:
     class automate:
         
                 location = 0 #stores location for movement function
-                duration = 1 #the duration in seconds for the mouse to move locations
+                duration = .2 #the duration in seconds for the mouse to move locations
                 message = 'print' #the default message for the type function
                 move = 0     #uses the move function when value is changed to 1
                 click = 0    #uses the click function when value is changed to 1
@@ -46,6 +46,7 @@ while True:
                 ctrlV = 0
                 progPause = 0
                 sleeper = 1
+                MHz = 1
                 
                 #this definition contains all the functions 
                 def doStuff(self):
@@ -62,8 +63,8 @@ while True:
                         print(self.message)
                         
                     elif self.dateTime == 1:
-                        fileDate = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-                        auto.typewrite('file_%s degrees_%s' %(temp,fileDate), interval = .1) #writes file with date, time, and temperature the test was run at
+                        fileDate = datetime.datetime.now().strftime("%Y-%m-%d")
+                        auto.typewrite('%s__%s_degC_%sMHz' %(fileDate,temp, self.MHz), interval = .05) #writes file with date, time, and temperature the test was run at
                             
                     elif self.enter == 1:
                         auto.hotkey('enter')
@@ -89,7 +90,7 @@ while True:
             
             step.append(automate()) #creates a new object for each step at the begining of the loop
             
-            x = input('\nWhat would you like to do with this step: \n1 = Move to and click a location, \n2 = Move to and double click a location, \n3 = Prints a file name with the date and time, \n4 = ctrl a,\n5 = Pause, \ns = Save steps, \nrs = Run saved steps, \nr = Run steps\n')
+            x = input('\nWhat would you like to do with this step: \n1 = Move to and click a location, \n2 = Move to and double click a location, \n3 = Prints a file name with the date, \n4 = ctrl a,\n5 = Pause, \ns = Save steps, \nrs = Run saved steps, \nr = Run steps\n')
             
             
             #this if block changes the variables in the object to determin which function is run
@@ -110,6 +111,8 @@ while True:
                 step[len(step) - 1].doubleclick = 1
                      
             elif x == '3': 
+                step[len(step) - 1].MHz = input('Enter the step frequency')
+                
                 step[len(step) - 1].dateTime = 1
 
             elif x == '4': 
@@ -227,6 +230,8 @@ while True:
         #checks if the last recorded temperature equals the set point
         if round(last) >= temp -1 and round(last) <= temp + 1: #Use the >= and <= to set temperature range
 
+            #Runs steps from saved file in the same directory
+            ##################################################################
             stepsFromSaved = []
             b = 0
             with open('company_data.pkl', 'rb') as i:
@@ -241,7 +246,7 @@ while True:
                             
                 for g in range(len(stepsFromSaved) - 1):
                         stepsFromSaved[g].doStuff()
-                
+            ###################################################################    
             print('\nSSTDR program run at %s degrees' %temp)
             
             temp += int(tempIncriment) #incriments the set temperature
