@@ -81,7 +81,33 @@ while True:
                     elif self.progPause == 1:
                         time.sleep(int(self.sleeper))
                         
-    
+    def measureTemp():
+        #Starts and ends temperature logging
+        auto.moveTo(logStart, duration = 2)
+        auto.click(logStart,)
+        auto.moveRel(110,0, duration = 2)
+        auto.click()
+        
+        #This lists all the files within a directory
+        fileList = (glob.glob(tempFiles + '\*.log'))
+        lastFileNum = len(fileList) - 1
+        #print(fileList[lastFileNum]) #Used for debugging
+        
+        #This reads the temp log and analizes the data
+        data = pd.read_table(fileList[lastFileNum] , skiprows = 6)
+        last = float(data.Temp.tail(1))
+        print("Last temp: ",last)
+        print("Rounded last temp: ", round(last))
+        print("Set temp: ",temp, "\n")
+        
+        
+        #Deletes the temp file so the folder doesn't fill up
+        os.remove(fileList[0])
+
+        return last
+        
+                        
+                        
     #this variable will contain all the step objects    
     step = []        
     rs = 0 #used to run saved steps
@@ -160,27 +186,8 @@ while True:
     
     while True and rs != 1:
          
-        #Starts and ends temperature logging
-        auto.moveTo(logStart, duration = 2)
-        auto.click(logStart,)
-        auto.moveRel(110,0, duration = 2)
-        auto.click()
         
-        #This lists all the files within a directory
-        fileList = (glob.glob(tempFiles + '\*.log'))
-        lastFileNum = len(fileList) - 1
-        #print(fileList[lastFileNum]) #Used for debugging
-        
-        #This reads the temp log and analizes the data
-        data = pd.read_table(fileList[lastFileNum] , skiprows = 6)
-        last = float(data.Temp.tail(1))
-        print("Last temp: ",last)
-        print("Rounded last temp: ", round(last))
-        print("Set temp: ",temp, "\n")
-        
-        #Deletes the temp file so the folder doesn't fill up
-        os.remove(fileList[0])
-    
+        last = measureTemp()
         
         #checks if the last recorded temperature equals the set point
         if round(last) >= temp -1 and round(last) <= temp + 1: #Use the >= and <= to set temperature range
@@ -205,26 +212,7 @@ while True:
         
     while True and rs == 1:
          
-        #Starts and ends temperature logging
-        auto.moveTo(logStart, duration = 2)
-        auto.click(logStart,)
-        auto.moveRel(110,0, duration = 2)
-        auto.click()
-        
-        #This lists all the files within a directory
-        fileList = (glob.glob(tempFiles + '\*.log'))
-        lastFileNum = len(fileList) - 1
-        #print(fileList[lastFileNum]) #Used for debugging
-        
-        #This reads the temp log and analizes the data
-        data = pd.read_table(fileList[lastFileNum] , skiprows = 6)
-        last = float(data.Temp.tail(1))
-        print("Last temp: ",last)
-        print("Rounded last temp: ", round(last))
-        print("Set temp: ",temp, "\n")
-        
-        #Deletes the temp file so the folder doesn't fill up
-        os.remove(fileList[0])
+        last = measureTemp()
     
         
         #checks if the last recorded temperature equals the set point
